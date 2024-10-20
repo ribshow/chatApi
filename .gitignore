@@ -1,0 +1,6 @@
+# removendo .vs
+.vs/
+
+# removendo pastas de build
+bin/
+obj/
