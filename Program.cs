@@ -6,6 +6,14 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins",
+        builder => builder.WithOrigins("http://127.0.0.1:8000")
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 // Add services to the container.
 
 builder.Services.Configure<ChatDatabaseSettings>(
@@ -21,18 +29,8 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-static void ConfigureServices(IServiceCollection services)
-{
-    services.Configure<RequestLocalizationOptions>(options =>
-    {
-        var supportedCultures = new[] { new CultureInfo("pt-BR") };
-        options.DefaultRequestCulture = new RequestCulture("pt-BR");
-        options.SupportedCultures = supportedCultures;
-        options.SupportedUICultures = supportedCultures;
-    });
-}
-
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -40,6 +38,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// permitindo requisição a partir do servidor local 
+app.UseCors("AllowSpecificOrigins");
 
 app.UseHttpsRedirection();
 

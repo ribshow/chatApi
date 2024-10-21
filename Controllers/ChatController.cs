@@ -67,7 +67,7 @@ namespace chatApi.Controllers
 
         // Enviando uma mensagem no chat e salvando no banco de dados
         [HttpPost("send")]
-        public async Task<IActionResult> SendMessage(string user, string message)
+        public async Task<IActionResult> SendMessage([FromForm]string user, [FromForm]string message)
         {
             // chama o método sendMessage do chatHub
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", user, message);
