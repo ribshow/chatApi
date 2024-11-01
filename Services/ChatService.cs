@@ -9,14 +9,20 @@ namespace chatApi.Services
     {
         private readonly IMongoCollection<Chat> _chatCollection;
 
-        public ChatService(IOptions<ChatDatabaseSettings> chatDatabaseSettings)
+        private readonly IMongoDatabase _database;
+
+        public ChatService(IOptions<ContextMongoDb> chatDatabaseSettings)
         {
             var mongoClient = new MongoClient(chatDatabaseSettings.Value.ConnectionString);
 
             var mongoDatabase = mongoClient.GetDatabase(chatDatabaseSettings.Value.DatabaseName);
 
+            _database = mongoDatabase;
+
             _chatCollection = mongoDatabase.GetCollection<Chat>(chatDatabaseSettings.Value.ChatCollectionName);
         }
+
+        public IMongoCollection<Chat> Chats => _chatCollection;
 
         // retorna todas as mensagens do chat
         public async Task<List<Chat>> GetAsync() =>

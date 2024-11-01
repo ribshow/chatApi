@@ -19,7 +19,7 @@ namespace chatApi.Models
         public string? Message { get; set; }
 
         [BsonElement("Date_time")]
-        public DateTime date { get; set; }
+        public DateTime date { get; set; } = DateTime.UtcNow;
 
         public Chat(string userName, string message)
         {

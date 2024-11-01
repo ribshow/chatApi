@@ -1,11 +1,15 @@
-﻿namespace chatApi.Models
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+
+namespace chatApi.Models
 {
-    public class ChatDatabaseSettings
+    public class ContextMongoDb
     {
+
         public string ConnectionString { get; set; } = null!;
 
         public string DatabaseName { get; set; } = null!;
 
         public string ChatCollectionName { get; set; } = null!;
-    }
+    }   
 }

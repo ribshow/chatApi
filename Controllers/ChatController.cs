@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using chatApi.Hubs;
 using chatApi.Models;
 using chatApi.Services;
+using MongoDB.Driver;
 
 namespace chatApi.Controllers
 {
@@ -117,6 +118,14 @@ namespace chatApi.Controllers
             await _chatService.RemoveAsync(id);
 
             return Ok(new { Message = "Mensagem apagada com sucesso!" });
+        }
+
+        [HttpDelete("delete/all")]
+        public async Task<IActionResult> DeleteAll()
+        {
+            await _chatService.Chats.DeleteManyAsync(c => true);
+
+            return Ok(new { message = "Coleção deletada com sucesso!" });
         }
     }
 }
