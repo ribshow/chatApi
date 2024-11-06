@@ -1,8 +1,10 @@
 using chatApi.Hubs;
 using chatApi.Models;
 using chatApi.Services;
+using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.Configure<ContextMongoDb>(
     builder.Configuration.GetSection("ChatDatabase"));
 
 builder.Services.AddSingleton<ChatService>();
+builder.Services.AddSingleton<ChatDSMService>();
 builder.Services.AddSingleton<ContextMongoDb>();
 
 builder.Services.AddControllers();
@@ -31,7 +34,29 @@ builder.Services.AddCors(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "ChatApi",
+        Description = "WebApi ASPNET, Chat with MongoDB",
+        Contact = new OpenApiContact
+        {
+            Name = "Developer",
+            Url = new Uri("https://ribshow.github.io/portfolio-react")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT LICENSE",
+            Url = new Uri("https://github.com/ribshow/chatApi/blob/main/LICENSE")
+        },
+    });
+
+    // Habilitando o caminho para o arquivo xml
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
@@ -43,7 +68,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// permitindo requisição a partir do servidor local 
+// permitindo requisiï¿½ï¿½o a partir do servidor local 
 app.UseCors("AllowSpecificOrigins");
 
 app.UseHttpsRedirection();
@@ -53,5 +78,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/chatHub");
+app.MapHub<chatApi.Hubs.ChatDSM>("/chatdsm");
 
 app.Run();

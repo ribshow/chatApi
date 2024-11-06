@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - chatnetwork
+
+  chatapi:
+    build: .
+    container_name: chatapi
+    ports:
+      - "3000:8080"
+    environment:
+      - ConnectionStrings__MongoDb=mongodb://mongodb:27017
+    depends_on:
+      - mongodb
+    networks:
+      - chatnetwork
+
+networks:
+  chatnetwork:
+    driver: bridge

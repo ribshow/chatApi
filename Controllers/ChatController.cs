@@ -23,7 +23,11 @@ namespace chatApi.Controllers
             _hubContext = hubContext;
             _logger = logger;
         }
-
+        /// <summary>
+        /// Returns all messages saved
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">All messages were returned</response>
         // exibindo todas as mensagens do chat
         [HttpGet(Name = "chatHub")]
         public async Task<List<Chat>> Index()
@@ -39,10 +43,26 @@ namespace chatApi.Controllers
 
         }
 
-        [HttpGet("review", Name = "teste")]
-        public async Task<ActionResult> Review()
+        /// <summary>
+        /// Return a specific message from chat
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET chat/id
+        ///     {
+        ///         "user": John Snow,
+        ///         "nickname": johnsnowzin,
+        ///         "message": Hello World!,
+        ///         "date": 05/11/2024 - 22:50:44
+        ///     }
+        /// </remarks>
+        [HttpGet("{id:length(24)}")]
+        public async Task<ActionResult> Details(string id)
         {
-            var id = "671459283c7d80a0b4e78331";
+            //1var id = "671459283c7d80a0b4e78331";
             var chat = await _chatService.GetAsync(id);
 
             if (chat == null)
@@ -58,7 +78,7 @@ namespace chatApi.Controllers
             try
             {
                 DateTime saoPauloTime = TimeZoneConfig.ConvertToSaoPauloTime(chat.date);
-                return Ok(new { Message = $"Data: {saoPauloTime}" });
+                return Ok(new {Id = $"{chat.Id}" ,User = $"{chat.Fullname}", Nickname = $"{chat.Fullname}", Message = $"{chat.Message}" ,Date = $"Data: {saoPauloTime}" });
             }
             catch (Exception ex)
             {
@@ -66,24 +86,62 @@ namespace chatApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Receive message from frontend e insert into the database
+        /// </summary>
+        /// <param name="user">John Snow</param>
+        /// <param name="message">Hello World!</param>
+        /// <param name="nickname">jhonsnow</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /chat/send
+        ///     {
+        ///         "user": John Snow,
+        ///         "nickname": johnsnowzin,
+        ///         "message": Hello World!
+        ///     }
+        /// </remarks>
+        /// <response code="201">Return the new chat created</response>
+        /// <response code="400">Error return, usually the parameter was passed as null</response>
         // Enviando uma mensagem no chat e salvando no banco de dados
         [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromForm]string user, [FromForm]string message)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SendMessage([FromForm]string user, [FromForm]string nickname, [FromForm] string message)
         {
             // chama o método sendMessage do chatHub
-            await _hubContext.Clients.All.SendAsync("ReceiveMessage", user, message);
+            //await _hubContext.Clients.All.SendAsync("ReceiveMessage", user, message);
 
             DateTime date = DateTime.Now.ToLocalTime();
 
             // instancia um novo chat
-            Chat messageChat = new(user, message);
+            Chat messageChat = new(user, nickname, message);
 
             // salva no banco de dados a mensagem
             await _chatService.CreateAsync(messageChat);
 
-            return CreatedAtAction(nameof(Index), new {User = $"{user}", Message = $"{message}" });
+            return CreatedAtAction(nameof(Index), new {User = $"{user}", Nickname = $"{nickname}" ,Message = $"{message}" });
         }
 
+        /// <summary>
+        /// Editing a message
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updatedChat"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     PUT /chat/id
+        ///     {
+        ///         "id": 672a80515730065ba59f1eea,
+        ///         "user": John Snow,
+        ///         "nickname": johnsnow,
+        ///         "message": New message
+        ///     }
+        /// </remarks>
         // atualizando uma mensagem do chat
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> Update(string id, Chat updatedChat)
@@ -97,7 +155,7 @@ namespace chatApi.Controllers
 
             // mantém o mesmo id, e nome de usuário para a mensagem
             updatedChat.Id = chat.Id;
-            updatedChat.UserName = chat.UserName;
+            updatedChat.Fullname = chat.Fullname;
 
             await _chatService.UpdateAsync(id, updatedChat);
 
@@ -125,7 +183,7 @@ namespace chatApi.Controllers
         {
             await _chatService.Chats.DeleteManyAsync(c => true);
 
-            return Ok(new { message = "Coleção deletada com sucesso!" });
+            return Ok(new { message = "Chat limpo com sucesso!" });
         }
     }
 }

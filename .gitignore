@@ -4,3 +4,4 @@
 # removendo pastas de build
 bin/
 obj/
+.vercel
