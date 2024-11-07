@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 
 namespace chatApi.Services
 {
-    public class ChatTechService
+    public class ChatGeekService
     {
-        private readonly IMongoCollection<ChatTech> _chatCollection;
+        private readonly IMongoCollection<ChatGeek> _chatCollection;
 
         private readonly IMongoDatabase _database;
 
-        public ChatTechService(IOptions<ContextMongoDb> chatDatabaseSettings)
+        public ChatGeekService(IOptions<ContextMongoDb> chatDatabaseSettings)
         {
             var mongoClient = new MongoClient(chatDatabaseSettings.Value.ConnectionString);
 
@@ -19,27 +19,27 @@ namespace chatApi.Services
 
             _database = mongoDatabase;
 
-            _chatCollection = mongoDatabase.GetCollection<ChatTech>(chatDatabaseSettings.Value.ChatTechCollection);
+            _chatCollection = mongoDatabase.GetCollection<ChatGeek>(chatDatabaseSettings.Value.ChatGeekCollection);
         }
 
-        public IMongoCollection<ChatTech> ChatTech => _chatCollection; 
+        public IMongoCollection<ChatGeek> Chats => _chatCollection;
 
-        public IMongoCollection<ChatTech> Chats => _database.GetCollection<ChatTech>("ChatTech");
+        public IMongoCollection<ChatGeek> ChatGeek => _database.GetCollection<ChatGeek>("ChatGeek");
 
         // retorna todas as mensagens do chat
-        public async Task<List<ChatTech>> GetAsync() =>
+        public async Task<List<ChatGeek>> GetAsync() =>
             await _chatCollection.Find(chat => true).ToListAsync();
 
         // retorna uma mensagem específica
-        public async Task<ChatTech?> GetAsync(string id) =>
+        public async Task<ChatGeek?> GetAsync(string id) =>
             await _chatCollection.Find(chat => chat.Id == id).FirstOrDefaultAsync();
 
         // salva uma nova mensagem no banco de dados
-        public async Task CreateAsync(ChatTech newChat) =>
+        public async Task CreateAsync(ChatGeek newChat) =>
             await _chatCollection.InsertOneAsync(newChat);
 
         // atualiza uma mensagem enviada
-        public async Task UpdateAsync(string id, ChatTech updateChat) =>
+        public async Task UpdateAsync(string id, ChatGeek updateChat) =>
             await _chatCollection.ReplaceOneAsync(chat => chat.Id == id, updateChat);
 
         // apaga uma mensagem enviada

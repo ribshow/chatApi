@@ -16,6 +16,7 @@ builder.Services.Configure<ContextMongoDb>(
 
 builder.Services.AddSingleton<ChatService>();
 builder.Services.AddSingleton<ChatTechService>();
+builder.Services.AddSingleton<ChatGeekService>();
 builder.Services.AddSingleton<ContextMongoDb>();
 
 builder.Services.AddControllers();
@@ -79,5 +80,6 @@ app.MapControllers();
 
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<chatApi.Hubs.ChatTech>("/chatHubTech");
+app.MapHub<chatApi.Hubs.ChatGeek>("/chatHubGeek");
 
 app.Run();

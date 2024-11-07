@@ -12,6 +12,8 @@ namespace chatApi.Models
 
         public string ChatCollectionName { get; set; } = null!;
 
-        public string ChatDSMCollection { get; set; } = null!;
+        public string ChatTechCollection { get; set; } = null!;
+
+        public string ChatGeekCollection { get; set; } = null!;
     }   
 }
