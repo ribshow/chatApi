@@ -15,7 +15,7 @@ builder.Services.Configure<ContextMongoDb>(
     builder.Configuration.GetSection("ChatDatabase"));
 
 builder.Services.AddSingleton<ChatService>();
-builder.Services.AddSingleton<ChatDSMService>();
+builder.Services.AddSingleton<ChatTechService>();
 builder.Services.AddSingleton<ContextMongoDb>();
 
 builder.Services.AddControllers();
@@ -78,6 +78,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<ChatHub>("/chatHub");
-app.MapHub<chatApi.Hubs.ChatDSM>("/chatdsm");
+app.MapHub<chatApi.Hubs.ChatTech>("/chatHubTech");
 
 app.Run();

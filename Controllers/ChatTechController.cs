@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using chatApi.Hubs;
 using chatApi.Models;
 using chatApi.Services;
 using MongoDB.Driver;
@@ -9,15 +8,15 @@ namespace chatApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ChatController : ControllerBase
+    public class ChatTechController : ControllerBase
     {
-        private readonly ChatService _chatService;
+        private readonly ChatTechService _chatService;
 
-        private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IHubContext<Hubs.ChatTech> _hubContext;
 
-        private readonly ILogger<ChatController> _logger;
+        private readonly ILogger<ChatTechController> _logger;
 
-        public ChatController(ILogger<ChatController> logger, IHubContext<ChatHub> hubContext, ChatService chatService)
+        public ChatTechController(ILogger<ChatTechController> logger, IHubContext<Hubs.ChatTech> hubContext, ChatTechService chatService)
         {
             _chatService = chatService;
             _hubContext = hubContext;
@@ -31,16 +30,16 @@ namespace chatApi.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     GET /chat
+        ///     GET /chatTech
         /// </remarks>
         /// <response code="200">All messages were returned</response>
-        [HttpGet(Name = "chatHub")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<List<Chat>> Index()
+        public async Task<List<Models.ChatTech>> Index()
         {
-           var chats = await _chatService.GetAsync();
-
-            foreach(Chat item in chats)
+            var chats = await _chatService.GetAsync();
+            //var chats = await _chatService.GetAsync();
+            foreach (Models.ChatTech item in chats)
             {
                 item.date = TimeZoneConfig.ConvertToSaoPauloTime(item.date);
             }
@@ -48,6 +47,7 @@ namespace chatApi.Controllers
             return chats;
 
         }
+
 
         /// <summary>
         /// Return a specific message from chat
@@ -57,7 +57,7 @@ namespace chatApi.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     GET /chat/id
+        ///     GET /chatTech/id
         ///     {
         ///         "user": John Snow,
         ///         "nickname": johnsnowzin,
@@ -74,7 +74,7 @@ namespace chatApi.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Details(string id)
         {
-            //1var id = "671459283c7d80a0b4e78331";
+            //var id = "671459283c7d80a0b4e78331";
             var chat = await _chatService.GetAsync(id);
 
             if (chat == null)
@@ -90,7 +90,7 @@ namespace chatApi.Controllers
             try
             {
                 DateTime saoPauloTime = TimeZoneConfig.ConvertToSaoPauloTime(chat.date);
-                return Ok(new {Id = $"{chat.Id}" ,User = $"{chat.Fullname}", Nickname = $"{chat.Fullname}", Message = $"{chat.Message}" ,Date = $"Data: {saoPauloTime}" });
+                return Ok(new { Id = $"{chat.Id}", User = $"{chat.Fullname}", Nickname = $"{chat.Fullname}", Message = $"{chat.Message}", Date = $"Data: {saoPauloTime}" });
             }
             catch (Exception ex)
             {
@@ -108,7 +108,7 @@ namespace chatApi.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     POST /chat/send
+        ///     POST /chatTech/send
         ///     {
         ///         "user": John Snow,
         ///         "nickname": johnsnowzin,
@@ -120,7 +120,7 @@ namespace chatApi.Controllers
         [HttpPost("send")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SendMessage([FromForm]string user, [FromForm]string nickname, [FromForm] string message)
+        public async Task<IActionResult> SendMessage([FromForm] string user, [FromForm] string nickname, [FromForm] string message)
         {
             // chama o método sendMessage do chatHub
             //await _hubContext.Clients.All.SendAsync("ReceiveMessage", user, message);
@@ -128,12 +128,12 @@ namespace chatApi.Controllers
             DateTime date = DateTime.Now.ToLocalTime();
 
             // instancia um novo chat
-            Chat messageChat = new(user, nickname, message);
+            Models.ChatTech messageChat = new(user, nickname, message);
 
             // salva no banco de dados a mensagem
-            await _chatService.CreateAsync(messageChat);
+            await _chatService.ChatTech.InsertOneAsync(messageChat);
 
-            return CreatedAtAction(nameof(Index), new {User = $"{user}", Nickname = $"{nickname}" ,Message = $"{message}" });
+            return CreatedAtAction(nameof(Index), new { User = $"{user}", Nickname = $"{nickname}", Message = $"{message}" });
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace chatApi.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     PUT /chat/id
+        ///     PUT /chatTech/id
         ///     {
         ///         "id": 672a80515730065ba59f1eea,
         ///         "user": John Snow,
@@ -160,12 +160,12 @@ namespace chatApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update(string id, Chat updatedChat)
+        public async Task<IActionResult> Update(string id, Models.ChatTech updatedChat)
         {
             var chat = await _chatService.GetAsync(id);
             var oldChat = chat;
 
-            if(chat is null)
+            if (chat is null)
             {
                 return NotFound();
             }
@@ -177,7 +177,7 @@ namespace chatApi.Controllers
 
             await _chatService.UpdateAsync(id, updatedChat);
 
-            return Ok(new { OldMessage = $"{oldChat?.Message}", NewMessage = $"{updatedChat.Message}" });
+            return Ok(new { OldMessage = $"{oldChat?.Message}", Message = $"{updatedChat.Message}" });
         }
 
         /// <summary>
@@ -188,14 +188,13 @@ namespace chatApi.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     DELETE /chat/id
+        ///     DELETE /chatTech/id
         ///     {
         ///         "id": 672a80515730065ba59f1eea
         ///     }
         /// </remarks>
         /// <response code="200">Chat deleted with successfully</response>
         /// <response code="404">Chat not found</response>
-        // apagando uma mensagem do chat
         [HttpDelete("{id:length(24)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -203,7 +202,7 @@ namespace chatApi.Controllers
         {
             var chat = await _chatService.GetAsync(id);
 
-            if(chat is null)
+            if (chat is null)
             {
                 return NotFound();
             }
@@ -220,16 +219,16 @@ namespace chatApi.Controllers
         /// <remarks>
         /// Sample request:
         /// 
-        ///     DELETE /chat/delete/all
+        ///     DELETE /chatTech/delete/all
         /// </remarks>
         /// <response code="202">Chat cleaned with successfully</response>
         [HttpDelete("delete/all")]
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         public async Task<IActionResult> DeleteAll()
         {
-            await _chatService.Chats.DeleteManyAsync(c => true);
+            await _chatService.Chats.DeleteManyAsync(chat => true);
 
-            return Ok(new { message = "Chat limpo com sucesso!" });
+            return Accepted(new { message = "Chat limpo com sucesso!" });
         }
     }
 }

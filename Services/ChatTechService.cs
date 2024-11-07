@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 
 namespace chatApi.Services
 {
-    public class ChatDSMService
+    public class ChatTechService
     {
-        private readonly IMongoCollection<ChatDSM> _chatCollection;
+        private readonly IMongoCollection<ChatTech> _chatCollection;
 
         private readonly IMongoDatabase _database;
 
-        public ChatDSMService(IOptions<ContextMongoDb> chatDatabaseSettings)
+        public ChatTechService(IOptions<ContextMongoDb> chatDatabaseSettings)
         {
             var mongoClient = new MongoClient(chatDatabaseSettings.Value.ConnectionString);
 
@@ -19,27 +19,27 @@ namespace chatApi.Services
 
             _database = mongoDatabase;
 
-            _chatCollection = mongoDatabase.GetCollection<ChatDSM>(chatDatabaseSettings.Value.ChatDSMCollection);
+            _chatCollection = mongoDatabase.GetCollection<ChatTech>(chatDatabaseSettings.Value.ChatDSMCollection);
         }
 
-        public IMongoCollection<ChatDSM> ChatDSM => _chatCollection; 
+        public IMongoCollection<ChatTech> ChatTech => _chatCollection; 
 
-        public IMongoCollection<ChatDSM> Chats => _database.GetCollection<ChatDSM>("ChatDSM");
+        public IMongoCollection<ChatTech> Chats => _database.GetCollection<ChatTech>("ChatTech");
 
         // retorna todas as mensagens do chat
-        public async Task<List<ChatDSM>> GetAsync() =>
+        public async Task<List<ChatTech>> GetAsync() =>
             await _chatCollection.Find(chat => true).ToListAsync();
 
         // retorna uma mensagem específica
-        public async Task<ChatDSM?> GetAsync(string id) =>
+        public async Task<ChatTech?> GetAsync(string id) =>
             await _chatCollection.Find(chat => chat.Id == id).FirstOrDefaultAsync();
 
         // salva uma nova mensagem no banco de dados
-        public async Task CreateAsync(ChatDSM newChat) =>
+        public async Task CreateAsync(ChatTech newChat) =>
             await _chatCollection.InsertOneAsync(newChat);
 
         // atualiza uma mensagem enviada
-        public async Task UpdateAsync(string id, ChatDSM updateChat) =>
+        public async Task UpdateAsync(string id, ChatTech updateChat) =>
             await _chatCollection.ReplaceOneAsync(chat => chat.Id == id, updateChat);
 
         // apaga uma mensagem enviada

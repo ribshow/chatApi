@@ -2,7 +2,7 @@
 
 namespace chatApi.Hubs
 {
-    public class ChatDSM : Hub
+    public class ChatTech : Hub
     {
         public async Task SendMessage(string user, string message)
         {

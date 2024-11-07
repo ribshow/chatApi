@@ -5,7 +5,7 @@ using chatApi.Models;
 
 namespace chatApi.Models
 {
-    public class ChatDSM
+    public class ChatTech
     {
         // torna id a chave primária do documento
         [BsonId]
@@ -24,7 +24,7 @@ namespace chatApi.Models
         [BsonElement("Date_time")]
         public DateTime date { get; set; } = DateTime.UtcNow;
 
-        public ChatDSM(string fullName, string nickname, string message)
+        public ChatTech(string fullName, string nickname, string message)
         {
             Fullname = fullName;
             Nickname = nickname;
