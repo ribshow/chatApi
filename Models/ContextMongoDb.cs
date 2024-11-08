@@ -15,5 +15,7 @@ namespace chatApi.Models
         public string ChatTechCollection { get; set; } = null!;
 
         public string ChatGeekCollection { get; set; } = null!;
+
+        public string ChatSciCollection { get; set; } = null!;
     }   
 }
