@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using chatApi.Models;
 using chatApi.Services;
 using MongoDB.Driver;
+using Microsoft.AspNetCore.Authorization;
 
 namespace chatApi.Controllers
 {
@@ -34,6 +35,7 @@ namespace chatApi.Controllers
         /// </remarks>
         /// <response code="200">All messages were returned</response>
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<List<Models.ChatTech>> Index()
         {
@@ -69,6 +71,7 @@ namespace chatApi.Controllers
         /// <response code="404">Chat not found</response>
         /// <response code="500">Id format invalid</response>
         [HttpGet("{id:length(24)}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -118,6 +121,7 @@ namespace chatApi.Controllers
         /// <response code="201">Return the new chat created</response>
         /// <response code="400">Error return, usually the parameter was passed as null</response>
         [HttpPost("send")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SendMessage([FromForm] string user, [FromForm] string nickname, [FromForm] string message)
@@ -157,6 +161,7 @@ namespace chatApi.Controllers
         /// <response code="404">Chat not found</response>
         /// <response code="500">ID format invalid</response>
         [HttpPut("{id:length(24)}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -196,6 +201,7 @@ namespace chatApi.Controllers
         /// <response code="200">Chat deleted with successfully</response>
         /// <response code="404">Chat not found</response>
         [HttpDelete("{id:length(24)}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(string id)
@@ -223,6 +229,7 @@ namespace chatApi.Controllers
         /// </remarks>
         /// <response code="202">Chat cleaned with successfully</response>
         [HttpDelete("delete/all")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         public async Task<IActionResult> DeleteAll()
         {

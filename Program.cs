@@ -5,12 +5,34 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
 
+// adicionando jwt bearer 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "127.0.0.1:8000",
+            ValidAudience = "127.0.0.1:8000",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CHAVESUPERSEGURACHAVESUPERSEGURA"))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// contexto do database
 builder.Services.Configure<ContextMongoDb>(
     builder.Configuration.GetSection("ChatDatabase"));
 
@@ -76,6 +98,7 @@ app.UseCors("AllowSpecificOrigins");
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

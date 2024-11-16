@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using chatApi.Models;
 using chatApi.Services;
 using MongoDB.Driver;
+using Microsoft.AspNetCore.Authorization;
 
 namespace chatApi.Controllers
 {
@@ -34,6 +35,7 @@ namespace chatApi.Controllers
         /// </remarks>
         /// <response code="200">All messages were returned</response>
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<List<Models.ChatSci>> Index()
         {
