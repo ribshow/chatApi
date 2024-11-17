@@ -16,17 +16,37 @@ var builder = WebApplication.CreateBuilder(args);
 
 // adicionando jwt bearer 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddJwtBearer(static options =>
     {
+        options.Audience = "http://127.0.0.1:8000";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "127.0.0.1:8000",
-            ValidAudience = "127.0.0.1:8000",
+            ValidIssuer = "https://localhost:7125",
+            ValidAudience = "http://127.0.0.1:8000",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("CHAVESUPERSEGURACHAVESUPERSEGURA"))
+        };
+        // configurando o JWT para a porta de entrada dos HUB's
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = new PathString(context.HttpContext.Request.Path);
+
+                // lista de caminhos para o hub
+                var hubPaths = new[] { "/chatHub", "/chatHubGeek", "/chatHubTech", "/chatHubSci" };
+
+                // verificando se a solicitação é para um dos hubs
+                if (!string.IsNullOrEmpty(accessToken) && hubPaths.Any(hubPath => path.StartsWithSegments(new PathString(hubPath))))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -103,9 +123,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chatHub");
-app.MapHub<chatApi.Hubs.ChatTech>("/chatHubTech");
-app.MapHub<chatApi.Hubs.ChatGeek>("/chatHubGeek");
-app.MapHub<chatApi.Hubs.ChatSci>("/chatHubSci");
+app.MapHub<ChatHub>("/chatHub").RequireAuthorization();
+app.MapHub<chatApi.Hubs.ChatTech>("/chatHubTech").RequireAuthorization();
+app.MapHub<chatApi.Hubs.ChatGeek>("/chatHubGeek").RequireAuthorization();
+app.MapHub<chatApi.Hubs.ChatSci>("/chatHubSci").RequireAuthorization();
 
 app.Run();
