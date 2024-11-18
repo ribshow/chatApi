@@ -20,24 +20,56 @@ namespace chatApi.Controllers
         {
             _context = context;
         }
-        
+
+        /// <summary>
+        /// Generates a valid JWT token
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST /api/auth
+        ///     {
+        ///         "email": "test@example.com",
+        ///         "password": "test1234!"
+        ///     }
+        /// </remarks>
+        /// <response code="201">{{ token }}</response>
+        /// <response code="401">Unauthorized - Credentials invalid</response>
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] Users user)
         {
             var users = await _context.Users.Find(_ => true).ToListAsync();
 
-            foreach(Users userEmail in users)
+            foreach (Users userEmail in users)
             {
-                if(user.Email == userEmail.Email)
+                if (user.Email == userEmail.Email)
                 {
                     var token = GenerateJwtToken(user.Email);
-          
+
                     return Ok(new { token });
                 }
             }
             return Unauthorized();
         }
 
+        /// <summary>
+        /// Register a user 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <remarks>
+        /// Sample Request:
+        /// 
+        ///     POST /api/auth/register
+        ///     {
+        ///         "email": "test@example.com",
+        ///         "password": "test1234!"
+        ///     }
+        /// </remarks>
+        /// <returns></returns>
+        /// <response code="200">User Created with successfully</response>
+        /// <response code="400">Generally Email or Password invalid</response>
         [HttpPost("Register")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody] Users user)

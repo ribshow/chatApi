@@ -35,9 +35,11 @@ namespace chatApi.Controllers
         ///     GET /chat
         /// </remarks>
         /// <response code="200">All messages were returned</response>
+        /// <response code="401">Unauthorized</response>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<List<Chat>> Index()
         {
            var chats = await _chatService.GetAsync();
