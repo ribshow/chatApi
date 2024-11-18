@@ -17,7 +17,7 @@ namespace chatApi.Models
 
         [BsonElement("Password")]
         [Required(ErrorMessage = "Digit a valid password")]
-        [StringLength(8, ErrorMessage = "Password must contain minimum 8 caracters")]
+        [MinLength(8, ErrorMessage = "Password must contain minimum 8 caracters")]
         public string? Password { get; set; }
 
         public Users(string? email, string? password)

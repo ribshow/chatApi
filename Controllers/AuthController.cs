@@ -103,7 +103,6 @@ namespace chatApi.Controllers
                 issuer: "https://localhost:7125",
                 audience: "http://127.0.0.1:8000",
                 claims: claims,
-                expires: DateTime.Now.AddHours(12),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
