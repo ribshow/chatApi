@@ -24,6 +24,9 @@ namespace chatApi.Models
         [BsonElement("Date_time")]
         public DateTime date { get; set; } = DateTime.UtcNow;
 
+        [BsonElement("Status")]
+        public string? Status { get; set; } = null;
+
         [BsonElement("Token")]
         public string token { get; set; } = null!;
 
