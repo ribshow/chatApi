@@ -15,15 +15,18 @@ namespace chatApi.Controllers
     {
         private readonly ChatService _chatService;
 
+        private readonly ContextMongoDb _database;
+
         private readonly IHubContext<ChatHub> _hubContext;
 
         private readonly ILogger<ChatController> _logger;
 
-        public ChatController(ILogger<ChatController> logger, IHubContext<ChatHub> hubContext, ChatService chatService)
+        public ChatController(ILogger<ChatController> logger, IHubContext<ChatHub> hubContext, ChatService chatService, ContextMongoDb database)
         {
             _chatService = chatService;
             _hubContext = hubContext;
             _logger = logger;
+            _database = database;
         }
 
         /// <summary>
@@ -141,50 +144,6 @@ namespace chatApi.Controllers
             await _chatService.CreateAsync(messageChat);
 
             return CreatedAtAction(nameof(Index), new {User = $"{user}", Nickname = $"{nickname}" ,Message = $"{message}" });
-        }
-
-        /// <summary>
-        /// Report Message
-        /// </summary>
-        /// <param name="status"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpPost("report")]
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ReportMessage([FromForm] string status, [FromForm] string id)
-        {
-            if (string.IsNullOrEmpty(status))
-            {
-                return BadRequest(status);
-            }
-
-            Console.WriteLine($"{status} {id}");
-
-            var chat = await _chatService.GetAsync(id);
-
-            var chatId = id;
-
-            if(chat == null)
-            {
-                return BadRequest();
-            }
-
-            chat.Status = status;
-
-            Console.WriteLine($"{chat.Status}");
-
-            try
-            {
-                await _chatService.UpdateAsync(chatId, chat);
-                Console.WriteLine($"Chat atualizado com sucesso!");
-            } catch (Exception e)
-            {
-                Console.WriteLine($"Erro ao atualizar {e.Message}");
-            }
-
-            return Ok(new { msg = "Denúncia efetuada com sucesso!" });
         }
 
         /// <summary>

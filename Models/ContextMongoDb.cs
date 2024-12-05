@@ -34,5 +34,7 @@ namespace chatApi.Models
         public IMongoCollection<Users> Users => _database.GetCollection<Users>("Users");
 
         public IMongoCollection<Chat> Chat => _database.GetCollection<Chat>("Chat");
+
+        public IMongoCollection<Blacklist> Blacklist => _database.GetCollection<Blacklist>("Blacklist");
     }   
 }

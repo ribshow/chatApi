@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using chatApi.Models;
-using chatApi.Services;
+using chatApi.Responses;
 using MongoDB.Driver;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using MongoDB.Bson;
 
 namespace chatApi.Controllers
 {
@@ -35,20 +34,22 @@ namespace chatApi.Controllers
         ///         "password": "test1234!"
         ///     }
         /// </remarks>
-        /// <response code="201">{{ token }}</response>
+        /// <response code="200">User authenticated successully</response>
         /// <response code="401">Unauthorized - Credentials invalid</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AuthResponse))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] Users user)
         {
             var users = await _context.Users.Find(_ => true).ToListAsync();
 
             foreach (Users userEmail in users)
             {
-                if (user.Email == userEmail.Email)
+                if (user.Email == userEmail.Email && user.Password == userEmail.Password)
                 {
                     var token = GenerateJwtToken(user.Email);
 
-                    return Ok(new { token });
+                    return Ok(new AuthResponse {message = "User authenticated successfully", token =  token });
                 }
             }
             return Unauthorized();
